@@ -3,583 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Hardware open-source para transformar módulos Wi-Fi descartados em infraestrutura de rede livre, reprogramável e sustentável.">
-  <title>Open Hardware — Reciclagem Tecnológica</title>
-
+  <title>Projeto Open Hardware - Hardware Livre e Sustentável</title>
   <style>
-    :root{
-      --bg:#080a09;
-      --bg-soft:#0e1210;
-      --panel:#111512;
-      --panel-2:#151a17;
-      --text:#f4f5f1;
-      --muted:#a7ada8;
-      --line:rgba(255,255,255,.10);
-      --green:#37d56b;
-      --green-dark:#123d23;
-      --gold:#c6a66a;
-      --max:1180px;
-      --radius:26px;
+    :root {
+      --bg: #0f172a;
+      --bg-soft: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0ea5e9;
+      --line: #334155;
     }
 
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      color:var(--text);
-      background:
-        radial-gradient(circle at 75% 5%, rgba(55,213,107,.08), transparent 28rem),
-        radial-gradient(circle at 15% 35%, rgba(198,166,106,.05), transparent 24rem),
-        var(--bg);
-      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      line-height:1.6;
-      -webkit-font-smoothing:antialiased;
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
     }
 
-    a{color:inherit;text-decoration:none}
-    img{display:block;max-width:100%}
-    .container{width:min(var(--max),calc(100% - 48px));margin:auto}
-
-    /* Header */
-    header{
-      position:fixed;
-      top:0;left:0;right:0;
-      z-index:50;
-      background:rgba(8,10,9,.72);
-      backdrop-filter:blur(18px);
-      border-bottom:1px solid transparent;
-      transition:.25s ease;
-    }
-    header.scrolled{
-      border-color:var(--line);
-      background:rgba(8,10,9,.90);
-    }
-    .nav{
-      height:76px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:24px;
-    }
-    .brand{
-      display:flex;align-items:center;gap:11px;
-      font-weight:800;letter-spacing:.08em;text-transform:uppercase;
-      font-size:.82rem;
-    }
-    .brand-mark{
-      width:32px;height:32px;border-radius:10px;
-      display:grid;place-items:center;
-      color:#07100a;background:var(--green);
-      font-weight:900;
-      box-shadow:0 0 28px rgba(55,213,107,.18);
-    }
-    .nav-links{display:flex;gap:26px;color:#c8ccc9;font-size:.88rem}
-    .nav-links a:hover{color:#fff}
-    .nav-cta{
-      padding:11px 17px;border:1px solid rgba(55,213,107,.4);
-      border-radius:999px;color:#dfffe8;background:rgba(55,213,107,.07);
-      font-size:.86rem;font-weight:700;
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
     }
 
-    /* Hero */
-    .hero{
-      min-height:100vh;
-      display:grid;
-      align-items:center;
-      padding:150px 0 90px;
-      overflow:hidden;
+    header {
+      padding: 40px 0;
+      border-bottom: 1px solid var(--line);
     }
-    .hero-grid{
-      display:grid;
-      grid-template-columns:1.02fr .98fr;
-      align-items:center;
-      gap:70px;
-    }
-    .eyebrow{
-      display:inline-flex;align-items:center;gap:10px;
-      color:var(--gold);font-size:.74rem;font-weight:800;
-      letter-spacing:.22em;text-transform:uppercase;
-      margin-bottom:22px;
-    }
-    .eyebrow::before{
-      content:"";width:30px;height:1px;background:var(--gold);
-    }
-    h1{
-      margin:0;
-      max-width:720px;
-      font-size:clamp(3.3rem,7vw,6.8rem);
-      line-height:.91;
-      letter-spacing:-.065em;
-      font-weight:850;
-    }
-    .hero h1 span{color:var(--green)}
-    .hero-copy{
-      margin:28px 0 0;
-      max-width:650px;
-      color:var(--muted);
-      font-size:1.08rem;
-    }
-    .hero-actions{
-      display:flex;flex-wrap:wrap;gap:13px;margin-top:34px;
-    }
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:10px;
-      min-height:48px;padding:0 20px;border-radius:999px;
-      font-weight:800;font-size:.9rem;
-      transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
-    }
-    .btn:hover{transform:translateY(-2px)}
-    .btn-primary{
-      color:#061008;background:var(--green);
-      box-shadow:0 12px 35px rgba(55,213,107,.18);
-    }
-    .btn-secondary{border:1px solid var(--line);background:rgba(255,255,255,.025);color:#e7e9e7}
-    .hero-note{margin-top:20px;color:#747b76;font-size:.78rem}
 
-    .hero-visual{
-      position:relative;
-      min-height:600px;
-      display:grid;place-items:center;
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: var(--primary);
     }
-    .hero-visual::before{
-      content:"";position:absolute;width:420px;height:420px;border-radius:50%;
-      background:rgba(55,213,107,.10);filter:blur(70px);
-    }
-    .hero-card{
-      position:relative;width:min(520px,100%);
-      padding:18px;border:1px solid var(--line);
-      border-radius:32px;background:rgba(255,255,255,.035);
-      box-shadow:0 35px 100px rgba(0,0,0,.45);
-    }
-    .hero-card img{
-      width:100%;aspect-ratio:1/1.08;object-fit:cover;
-      border-radius:22px;filter:saturate(.9) contrast(1.05);
-    }
-    .floating-tag{
-      position:absolute;left:-22px;bottom:38px;
-      max-width:230px;padding:15px 17px;
-      border:1px solid rgba(55,213,107,.22);
-      border-radius:18px;background:rgba(10,14,11,.84);
-      backdrop-filter:blur(15px);
-      box-shadow:0 20px 50px rgba(0,0,0,.4);
-    }
-    .floating-tag strong{display:block;font-size:.82rem}
-    .floating-tag small{color:#929a94}
 
-    section{padding:115px 0}
-    .section-head{max-width:720px;margin-bottom:48px}
-    .section-kicker{
-      color:var(--green);font-size:.72rem;font-weight:850;
-      letter-spacing:.20em;text-transform:uppercase;
+    section {
+      padding: 80px 0;
     }
-    h2{
-      margin:10px 0 15px;
-      font-size:clamp(2.1rem,4.2vw,4rem);
-      line-height:.98;letter-spacing:-.045em;
-    }
-    .section-head p{color:var(--muted);font-size:1.02rem}
 
-    /* Impact */
-    .impact{
-      border-top:1px solid var(--line);
-      border-bottom:1px solid var(--line);
-      background:linear-gradient(180deg,rgba(255,255,255,.018),transparent);
+    .section-kicker {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      margin-bottom: 12px;
+      font-weight: bold;
     }
-    .impact-grid{
-      display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch;
-    }
-    .impact-copy{
-      padding:42px;border:1px solid var(--line);border-radius:var(--radius);
-      background:linear-gradient(145deg,rgba(55,213,107,.07),rgba(255,255,255,.018));
-    }
-    .impact-copy p{color:var(--muted);font-size:1.03rem}
-    .impact-visual{
-      border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);
-      min-height:460px;
-    }
-    .impact-visual img{width:100%;height:100%;object-fit:cover}
 
-    /* Features */
-    .feature-grid{
-      display:grid;grid-template-columns:repeat(3,1fr);gap:18px;
+    .cta-box {
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 50px 40px;
     }
-    .feature{
-      min-height:300px;padding:30px;border:1px solid var(--line);
-      border-radius:22px;background:var(--panel);
-      position:relative;overflow:hidden;
-    }
-    .feature::after{
-      content:"";position:absolute;width:140px;height:140px;border-radius:50%;
-      right:-60px;bottom:-70px;background:rgba(55,213,107,.07);filter:blur(8px);
-    }
-    .feature-num{font-size:.72rem;color:var(--green);font-weight:900;letter-spacing:.15em}
-    .feature h3{font-size:1.45rem;letter-spacing:-.025em;margin:55px 0 10px}
-    .feature p{color:var(--muted);font-size:.94rem}
 
-    /* Product */
-    .product{
-      display:grid;grid-template-columns:.9fr 1.1fr;gap:60px;align-items:center;
+    .cta-box h2 {
+      font-size: 2rem;
+      margin-top: 0;
+      margin-bottom: 20px;
     }
-    .product-image{
-      border-radius:28px;overflow:hidden;border:1px solid var(--line);
-      background:#0c0e0d;box-shadow:0 35px 90px rgba(0,0,0,.35);
-    }
-    .product-image img{width:100%;aspect-ratio:1/1;object-fit:cover}
-    .specs{
-      display:grid;grid-template-columns:1fr 1fr;
-      border-top:1px solid var(--line);margin-top:28px;
-    }
-    .spec{
-      padding:19px 0;border-bottom:1px solid var(--line);
-    }
-    .spec:nth-child(odd){padding-right:20px}
-    .spec:nth-child(even){padding-left:20px;border-left:1px solid var(--line)}
-    .spec b{display:block;font-size:1.05rem}
-    .spec span{color:#7f8782;font-size:.78rem}
 
-    /* Gallery */
-    .gallery{
-      display:grid;grid-template-columns:1.1fr .9fr;gap:18px;
+    .cta-box p {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 700px;
     }
-    .gallery-card{
-      border:1px solid var(--line);border-radius:24px;overflow:hidden;
-      background:var(--panel);
-    }
-    .gallery-card.large{grid-row:span 2}
-    .gallery-card img{width:100%;height:100%;object-fit:cover;min-height:260px}
-    .gallery-card.large img{min-height:600px}
 
-    /* CTA */
-    .cta{
-      padding:90px 0 120px;
-    }
-    .cta-box{
-      position:relative;overflow:hidden;
-      padding:65px;border-radius:32px;border:1px solid rgba(55,213,107,.18);
-      background:
-        radial-gradient(circle at 80% 20%,rgba(55,213,107,.13),transparent 28%),
-        linear-gradient(135deg,#111712,#0b0e0c);
-    }
-    .cta-box h2{max-width:760px}
-    .cta-box p{max-width:650px;color:var(--muted)}
-    .cta-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
-
-    /* Estilos da Cartinha de Agradecimento */
-    #secao-agradecimento {
-      display: none;
-      text-align: center;
-      margin: 40px auto;
-    }
-    .carta-container {
-      perspective: 1000px;
-      width: 320px;
-      height: 220px;
-      margin: 20px auto;
-      cursor: pointer;
-    }
-    .envelope {
-      width: 100%;
-      height: 100%;
-      background-color: #d6c4a1;
-      border: 2px solid #b8a989;
-      border-radius: 10px;
-      position: relative;
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    }
-    .envelope-flap {
-      width: 0;
-      height: 0;
-      border-left: 160px solid transparent;
-      border-right: 160px solid transparent;
-      border-bottom: 110px solid #c9b691;
-      position: absolute;
-      top: 0;
-      left: 0;
-      transition: transform 0.4s ease-in-out;
-      transform-origin: top;
-    }
-    .carta-conteudo {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      bottom: 10px;
-      background-color: #fff;
-      border-radius: 5px;
-      padding: 20px;
-      text-align: center;
-      color: #333;
-      font-family: 'Arial', sans-serif;
-      transform: translateZ(-1px);
-      opacity: 0;
-      transition: opacity 0.5s ease 0.4s;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+    /* Botões e Inputs */
+    .btn {
+      display: inline-flex;
       align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .carta-container.aberta .envelope {
-      transform: rotateY(180deg);
-    }
-    .carta-container.aberta .envelope-flap {
-      transform: rotateX(-180deg);
-      opacity: 0;
-    }
-    .carta-container.aberta .carta-conteudo {
-      opacity: 1;
-      transform: translateZ(0px);
+      justify-content: center;
+      text-decoration: none;
+      border-radius: 999px;
+      font-weight: bold;
+      transition: background 0.2s;
+      border: none;
     }
 
-    footer{
-      border-top:1px solid var(--line);
-      padding:28px 0;
-      color:#737a75;font-size:.8rem;
+    .btn-primary {
+      background-color: var(--primary);
+      color: #0f172a;
     }
-    .footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
-    .footer-row a:hover{color:#fff}
 
-    /* Reveal */
-    .reveal{opacity:0;transform:translateY(22px);transition:.7s ease}
-    .reveal.visible{opacity:1;transform:none}
-
-    @media(max-width:900px){
-      .nav-links{display:none}
-      .hero-grid,.impact-grid,.product{grid-template-columns:1fr;gap:45px}
-      .hero{padding-top:125px}
-      .hero-visual{min-height:auto}
-      .feature-grid{grid-template-columns:1fr}
-      .gallery{grid-template-columns:1fr}
-      .gallery-card.large{grid-row:auto}
-      .gallery-card.large img{min-height:360px}
-      .cta-box{padding:42px 28px}
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
     }
-    @media(max-width:560px){
-      .container{width:min(var(--max),calc(100% - 30px))}
-      section{padding:80px 0}
-      h1{font-size:3.35rem}
-      .hero-card{padding:10px;border-radius:24px}
-      .floating-tag{left:10px;bottom:20px}
-      .impact-copy{padding:28px}
-      .specs{grid-template-columns:1fr}
-      .spec:nth-child(even){padding-left:0;border-left:0}
-      .spec:nth-child(odd){padding-right:0}
-      .nav-cta{display:none}
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 10px 20px;
+    }
+
+    .btn-secondary:hover {
+      background: var(--line);
+    }
+
+    input[type="number"] {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 12px 18px;
+      border-radius: 999px;
+      outline: none;
+      width: 220px;
+      font-size: 0.9rem;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--primary);
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 0;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
     }
   </style>
 </head>
-
 <body>
-  <header id="header">
-    <div class="container nav">
-      <a class="brand" href="#top" aria-label="Open Hardware">
-        <span class="brand-mark">↻</span>
-        Open Hardware
-      </a>
-      <nav class="nav-links" aria-label="Navegação principal">
-        <a href="#projeto">Projeto</a>
-        <a href="#tecnologia">Tecnologia</a>
-        <a href="#produto">Hardware</a>
-        <a href="#apoie">Apoie</a>
-      </nav>
-      <a class="nav-cta" href="#apoie">Fazer parte →</a>
+
+  <header>
+    <div class="container">
+      <h1>Open Hardware</h1>
     </div>
   </header>
 
-  <main id="top">
-    <!-- Seção da Cartinha de Agradecimento (Aparece apenas com ?status=sucesso) -->
-    <div id="secao-agradecimento" class="container">
-      <h2 style="color: #00c853; margin-bottom: 5px;">Doação Confirmada! 🎉</h2>
-      <p style="color: var(--muted); font-size: 0.95rem;">Você recebeu uma cartinha de agradecimento. Clique nela para abrir:</p>
-
-      <div class="carta-container" id="minhaCartinha" onclick="abrirCarta()">
-        <div class="envelope">
-          <div class="envelope-flap"></div>
-          <div class="carta-conteudo">
-            <h3 style="color: #00c853; margin-bottom: 8px; font-size: 1.2rem;">Muito Obrigado! 🙏</h3>
-            <p style="margin: 0; font-size: 0.95rem; line-height: 1.4;">Obrigado por apoiar essa causa e Deus te abençoe por isso!</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <section class="hero">
-      <div class="container hero-grid">
-        <div class="reveal">
-          <div class="eyebrow">Reutilização Smart</div>
-          <h1>Reciclagem <span>tecnológica.</span></h1>
-          <p class="hero-copy">
-            Transformamos módulos Wi‑Fi perfeitamente funcionais que seriam descartados
-            em infraestrutura de rede aberta, reprogramável e independente.
-          </p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="#apoie">Apoiar o projeto ↗</a>
-            <a class="btn btn-secondary" href="#produto">Conhecer o hardware</a>
-          </div>
-          <div class="hero-note">Hardware independente • Open-source • Desenvolvido no Brasil</div>
-        </div>
-
-        <div class="hero-visual reveal">
-          <div class="hero-card">
-            <img src="https://openhardware.carrd.co/assets/images/image03.jpg?v=69e793cb"
-                 alt="Módulo Wi-Fi e placa de hardware open-source com duas antenas">
-          </div>
-          <div class="floating-tag">
-            <strong>De descarte a infraestrutura.</strong>
-            <small>Reaproveitamento real de módulos wireless.</small>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="impact" id="projeto">
-      <div class="container impact-grid">
-        <div class="impact-copy reveal">
-          <div class="section-kicker">01 / O problema</div>
-          <h2>Dar uma segunda vida ao hardware.</h2>
-          <p>
-            Milhares de placas Wi‑Fi de notebooks, nos padrões mini‑PCIe e M.2,
-            ainda funcionais acabam descartadas durante reparos e upgrades.
-          </p>
-          <p>
-            Nossa proposta é simples: criar uma plataforma que permita reaproveitar
-            esses módulos em uma nova infraestrutura de rede, reduzindo desperdício
-            e ampliando a vida útil de componentes eletrônicos.
-          </p>
-        </div>
-        <div class="impact-visual reveal">
-          <img src="https://openhardware.carrd.co/assets/images/image04.jpg?v=69e793cb"
-               alt="Placas eletrônicas formando um símbolo de reciclagem">
-        </div>
-      </div>
-    </section>
-
-    <section id="tecnologia">
-      <div class="container">
-        <div class="section-head reveal">
-          <div class="section-kicker">02 / Controle de rádio</div>
-          <h2>Transmissão e recepção sem limites.</h2>
-          <p>
-            Uma plataforma pensada para quem quer entender, programar e controlar
-            a infraestrutura de rede — em vez de depender de uma caixa fechada.
-          </p>
-        </div>
-
-        <div class="feature-grid">
-          <article class="feature reveal">
-            <div class="feature-num">01</div>
-            <h3>Rádio reprogramável</h3>
-            <p>
-              Trabalhe com módulos wireless compatíveis e tenha acesso a uma plataforma
-              orientada à experimentação e ao desenvolvimento.
-            </p>
-          </article>
-
-          <article class="feature reveal">
-            <div class="feature-num">02</div>
-            <h3>Linux & open-source</h3>
-            <p>
-              Rode uma distribuição Linux otimizada para criar aplicações, scripts,
-              serviços locais e ferramentas de segurança personalizadas.
-            </p>
-          </article>
-
-          <article class="feature reveal">
-            <div class="feature-num">03</div>
-            <h3>Infraestrutura livre</h3>
-            <p>
-              Construa gateways IoT, firewalls e soluções de rede próprias,
-              com uma arquitetura aberta para desenvolvimento.
-            </p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="produto">
-      <div class="container product">
-        <div class="product-image reveal">
-          <img src="https://openhardware.carrd.co/assets/images/image02.jpg?v=69e793cb"
-               alt="Placa de rede open-source com módulo Wi-Fi e painel de diagnóstico">
-        </div>
-
-        <div class="reveal">
-          <div class="section-kicker">03 / Especificações</div>
-          <h2>Tecnologia a serviço da liberdade.</h2>
-          <p style="color:var(--muted)">
-            A plataforma combina processamento dedicado, memória integrada e
-            interfaces para módulos wireless, formando uma base compacta para
-            experimentação e infraestrutura de rede.
-          </p>
-
-          <div class="specs">
-            <div class="spec">
-              <b>128 MB</b>
-              <span>Memória RAM</span>
-            </div>
-            <div class="spec">
-              <b>CPU dedicada</b>
-              <span>Processamento local</span>
-            </div>
-            <div class="spec">
-              <b>mini‑PCIe</b>
-              <span>Suporte a módulos wireless</span>
-            </div>
-            <div class="spec">
-              <b>M.2</b>
-              <span>Compatibilidade com módulos</span>
-            </div>
-          </div>
-
-          <div class="hero-actions">
-            <a class="btn btn-secondary" href="#apoie">Quero acompanhar</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="container">
-        <div class="section-head reveal">
-          <div class="section-kicker">04 / Engenharia</div>
-          <h2>Feito para experimentar.</h2>
-          <p>
-            Um projeto que aproxima hardware, software e sustentabilidade em uma
-            única plataforma.
-          </p>
-        </div>
-
-        <div class="gallery">
-          <div class="gallery-card large reveal">
-            <img src="https://openhardware.carrd.co/assets/images/image05.jpg?v=69e793cb"
-                 alt="Placa de rede com antenas e diagnóstico técnico">
-          </div>
-          <div class="gallery-card reveal">
-            <img src="https://openhardware.carrd.co/assets/images/image03.jpg?v=69e793cb"
-                 alt="Módulo wireless e placa-mãe">
-          </div>
-          <div class="gallery-card reveal">
-            <img src="https://openhardware.carrd.co/assets/images/image04.jpg?v=69e793cb"
-                 alt="Circuitos eletrônicos reutilizados">
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Seção de Meta de Arrecadação Automática -->
-    <div style="background: var(--panel); padding: 25px; border-radius: 12px; margin: 30px auto; max-width: 600px; text-align: center; color: var(--text);">
-        <h3>Apoie o Lote Piloto do GreenMesh</h3>
-        <p id="progress-text" style="margin: 10px 0; font-size: 1rem; color: var(--text-muted);">Sincronizando doações...</p>
-        
-        <!-- Barra vazia -->
-        <div style="background: var(--bg-soft); border-radius: 8px; overflow: hidden; height: 24px; width: 100%; border: 1px solid rgba(255,255,255,0.1);">
-            <!-- Preenchimento dinâmico -->
-            <div id="progress-bar" style="background: #00c853; width: 0%; height: 100%; transition: width 0.6s ease;"></div>
-        </div>
-    </div>
-
+  <main>
     <section class="cta" id="apoie">
       <div class="container">
         <div class="cta-box reveal">
@@ -590,92 +148,51 @@
             participe da comunidade e ajude a transformar módulos Wi‑Fi descartados
             em novas possibilidades.
           </p>
-          <div class="cta-actions">
-            <!-- Substitua o link '#' abaixo pelo link do seu PicPay/checkout -->
-            <a class="btn btn-primary" href="#">
-              Apoiar agora ↗
-            </a>
-            <a class="btn btn-secondary" href="mailto:contato@seudominio.com.br">
-              contato@seudominio.com.br
-            </a>
+
+          <!-- Bloco de doação flexível integrado -->
+          <div class="cta-actions" style="display: flex; flex-direction: column; align-items: flex-start; gap: 15px; margin-top: 28px;">
+            <p style="margin: 0; font-size: 0.9rem; color: var(--muted);">Escolha o valor que preferir doar (a partir de R$ 0,01):</p>
+            
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+              <input type="number" id="valorPersonalizado" placeholder="Ex: 5.00 ou 0.01" min="0.01" step="0.01">
+              <button class="btn btn-primary" onclick="pagarPersonalizado()" style="min-height: 48px; padding: 0 24px; font-size: 0.9rem; cursor: pointer;">
+                Doar agora ↗
+              </button>
+            </div>
+
+            <div style="margin-top: 5px;">
+              <a class="btn btn-secondary" href="mailto:contato@openhardware.com.br" style="min-height: 40px; font-size: 0.85rem;">
+                contato@openhardware.com.br
+              </a>
+            </div>
           </div>
+
         </div>
       </div>
     </section>
   </main>
 
   <footer>
-    <div class="container footer-row">
-      <span>© 2026 Open Hardware — Desenvolvido de forma independente no Brasil.</span>
-      <a href="#top">Voltar ao topo ↑</a>
+    <div class="container">
+      <p>&copy; 2026 Projeto Open Hardware. Todos os direitos reservados.</p>
     </div>
   </footer>
 
+  <!-- Função JavaScript para processar o valor livre -->
   <script>
-    // Animação do cabeçalho ao rolar
-    const header = document.getElementById('header');
-    window.addEventListener('scroll', () => {
-      header.classList.toggle('scrolled', window.scrollY > 20);
-    });
+    function pagarPersonalizado() {
+      const input = document.getElementById('valorPersonalizado');
+      let valor = parseFloat(input.value);
 
-    // Efeito de revelação de elementos na tela
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12 });
-
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-    // Função para abrir a cartinha de agradecimento
-    function abrirCarta() {
-      const cartinha = document.getElementById('minhaCartinha');
-      cartinha.classList.toggle('aberta');
-    }
-
-    // Carregar dados da arrecadação via Vercel
-    async function carregarArrecadacao() {
-      const metaTotal = 3000.00;
-      try {
-        const resposta = await fetch('/api/arrecadacao');
-        const dados = await resposta.json();
-        const valorArrecadado = dados.total || 0;
-
-        let porcentagem = (valorArrecadado / metaTotal) * 100;
-        if (porcentagem > 100) porcentagem = 100;
-
-        const valorFormatado = valorArrecadado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        const metaFormatada = metaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-        const barra = document.getElementById('progress-bar');
-        const texto = document.getElementById('progress-text');
-        
-        if (barra) barra.style.width = porcentagem + '%';
-        if (texto) {
-          texto.innerHTML = `Arrecadado: <strong>${valorFormatado}</strong> de ${metaFormatada} (${porcentagem.toFixed(1)}%)`;
-        }
-      } catch (e) {
-        const texto = document.getElementById('progress-text');
-        if (texto) texto.innerText = "Erro ao carregar dados de doação.";
+      if (isNaN(valor) || valor <= 0) {
+        alert('Por favor, insira um valor válido para a doação (ex: 0,01).');
+        return;
       }
+
+      // Redireciona para a API passando o valor formatado com duas casas decimais
+      window.location.href = `/api/pagar?valor=${valor.toFixed(2)}`;
     }
-
-    carregarArrecadacao();
-
-    // Verifica se o usuário voltou com ?status=sucesso após o pagamento
-    window.addEventListener('DOMContentLoaded', () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('status') === 'sucesso') {
-        const secao = document.getElementById('secao-agradecimento');
-        if (secao) {
-          secao.style.display = 'block';
-          secao.scrollIntoView({ behavior: 'smooth' });
-        }
-      }
-    });
   </script>
+
 </body>
 </html>

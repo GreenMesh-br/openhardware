@@ -264,6 +264,75 @@
     .cta-box p{max-width:650px;color:var(--muted)}
     .cta-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
 
+    /* Estilos da Cartinha de Agradecimento */
+    #secao-agradecimento {
+      display: none;
+      text-align: center;
+      margin: 40px auto;
+    }
+    .carta-container {
+      perspective: 1000px;
+      width: 320px;
+      height: 220px;
+      margin: 20px auto;
+      cursor: pointer;
+    }
+    .envelope {
+      width: 100%;
+      height: 100%;
+      background-color: #d6c4a1;
+      border: 2px solid #b8a989;
+      border-radius: 10px;
+      position: relative;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .envelope-flap {
+      width: 0;
+      height: 0;
+      border-left: 160px solid transparent;
+      border-right: 160px solid transparent;
+      border-bottom: 110px solid #c9b691;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transition: transform 0.4s ease-in-out;
+      transform-origin: top;
+    }
+    .carta-conteudo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      background-color: #fff;
+      border-radius: 5px;
+      padding: 20px;
+      text-align: center;
+      color: #333;
+      font-family: 'Arial', sans-serif;
+      transform: translateZ(-1px);
+      opacity: 0;
+      transition: opacity 0.5s ease 0.4s;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .carta-container.aberta .envelope {
+      transform: rotateY(180deg);
+    }
+    .carta-container.aberta .envelope-flap {
+      transform: rotateX(-180deg);
+      opacity: 0;
+    }
+    .carta-container.aberta .carta-conteudo {
+      opacity: 1;
+      transform: translateZ(0px);
+    }
+
     footer{
       border-top:1px solid var(--line);
       padding:28px 0;
@@ -320,6 +389,22 @@
   </header>
 
   <main id="top">
+    <!-- Seção da Cartinha de Agradecimento (Aparece apenas com ?status=sucesso) -->
+    <div id="secao-agradecimento" class="container">
+      <h2 style="color: #00c853; margin-bottom: 5px;">Doação Confirmada! 🎉</h2>
+      <p style="color: var(--muted); font-size: 0.95rem;">Você recebeu uma cartinha de agradecimento. Clique nela para abrir:</p>
+
+      <div class="carta-container" id="minhaCartinha" onclick="abrirCarta()">
+        <div class="envelope">
+          <div class="envelope-flap"></div>
+          <div class="carta-conteudo">
+            <h3 style="color: #00c853; margin-bottom: 8px; font-size: 1.2rem;">Muito Obrigado! 🙏</h3>
+            <p style="margin: 0; font-size: 0.95rem; line-height: 1.4;">Obrigado por apoiar essa causa e Deus te abençoe por isso!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <section class="hero">
       <div class="container hero-grid">
         <div class="reveal">
@@ -483,6 +568,18 @@
       </div>
     </section>
 
+    <!-- Seção de Meta de Arrecadação Automática -->
+    <div style="background: var(--panel); padding: 25px; border-radius: 12px; margin: 30px auto; max-width: 600px; text-align: center; color: var(--text);">
+        <h3>Apoie o Lote Piloto do GreenMesh</h3>
+        <p id="progress-text" style="margin: 10px 0; font-size: 1rem; color: var(--text-muted);">Sincronizando doações...</p>
+        
+        <!-- Barra vazia -->
+        <div style="background: var(--bg-soft); border-radius: 8px; overflow: hidden; height: 24px; width: 100%; border: 1px solid rgba(255,255,255,0.1);">
+            <!-- Preenchimento dinâmico -->
+            <div id="progress-bar" style="background: #00c853; width: 0%; height: 100%; transition: width 0.6s ease;"></div>
+        </div>
+    </div>
+
     <section class="cta" id="apoie">
       <div class="container">
         <div class="cta-box reveal">
@@ -494,8 +591,8 @@
             em novas possibilidades.
           </p>
           <div class="cta-actions">
-            <!-- Substitua este link pelo seu link real de apoio/campanha -->
-            <a class="btn btn-primary" href="#" onclick="alert('Substitua este link pelo endereço da sua campanha de apoio.'); return false;">
+            <!-- Substitua o link '#' abaixo pelo link do seu PicPay/checkout -->
+            <a class="btn btn-primary" href="#">
               Apoiar agora ↗
             </a>
             <a class="btn btn-secondary" href="mailto:contato@seudominio.com.br">
@@ -515,12 +612,13 @@
   </footer>
 
   <script>
+    // Animação do cabeçalho ao rolar
     const header = document.getElementById('header');
-
     window.addEventListener('scroll', () => {
       header.classList.toggle('scrolled', window.scrollY > 20);
     });
 
+    // Efeito de revelação de elementos na tela
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -531,157 +629,53 @@
     }, { threshold: 0.12 });
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-  </script>
-</body>
- <!-- Seção de Meta de Arrecadação Automática -->
-<div style="background: var(--panel); padding: 25px; border-radius: 12px; margin: 30px auto; max-width: 600px; text-align: center; color: var(--text);">
-    <h3>Apoie o Lote Piloto do GreenMesh</h3>
-    <p id="progress-text" style="margin: 10px 0; font-size: 1rem; color: var(--text-muted);">Sincronizando doações...</p>
-    
-    <!-- Barra vazia -->
-    <div style="background: var(--bg-soft); border-radius: 8px; overflow: hidden; height: 24px; width: 100%; border: 1px solid rgba(255,255,255,0.1);">
-        <!-- Preenchimento dinâmico -->
-        <div id="progress-bar" style="background: #00c853; width: 0%; height: 100%; transition: width 0.6s ease;"></div>
-    </div>
-</div>
 
-<script>
-  // Meta total do lote piloto (R$ 3.000,00)
-  const metaTotal = 3000.00;
-
-  async function carregarArrecadacao() {
-    try {
-      const resposta = await fetch('/api/arrecadacao');
-      const dados = await resposta.json();
-      const valorArrecadado = dados.total || 0;
-
-      let porcentagem = (valorArrecadado / metaTotal) * 100;
-      if (porcentagem > 100) porcentagem = 100;
-
-      const valorFormatado = valorArrecadado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-      const metaFormatada = metaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-      document.getElementById('progress-bar').style.width = porcentagem + '%';
-      document.getElementById('progress-text').innerHTML = 
-        `Arrecadado: <strong>${valorFormatado}</strong> de ${metaFormatada} (${porcentagem.toFixed(1)}%)`;
-    } catch (e) {
-      document.getElementById('progress-text').innerText = "Erro ao carregar dados de doação.";
+    // Função para abrir a cartinha de agradecimento
+    function abrirCarta() {
+      const cartinha = document.getElementById('minhaCartinha');
+      cartinha.classList.toggle('aberta');
     }
-  }
-  
-  carregarArrecadacao();
-</script>
-  <!-- Estilos da Cartinha -->
-<style>
-  #secao-agradecimento {
-    display: none; /* Fica escondido por padrão */
-    text-align: center;
-    margin: 40px auto;
-  }
 
-  .carta-container {
-    perspective: 1000px;
-    width: 320px;
-    height: 220px;
-    margin: 20px auto;
-    cursor: pointer;
-  }
+    // Carregar dados da arrecadação via Vercel
+    async function carregarArrecadacao() {
+      const metaTotal = 3000.00;
+      try {
+        const resposta = await fetch('/api/arrecadacao');
+        const dados = await resposta.json();
+        const valorArrecadado = dados.total || 0;
 
-  .envelope {
-    width: 100%;
-    height: 100%;
-    background-color: #d6c4a1;
-    border: 2px solid #b8a989;
-    border-radius: 10px;
-    position: relative;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  }
+        let porcentagem = (valorArrecadado / metaTotal) * 100;
+        if (porcentagem > 100) porcentagem = 100;
 
-  .envelope-flap {
-    width: 0;
-    height: 0;
-    border-left: 160px solid transparent;
-    border-right: 160px solid transparent;
-    border-bottom: 110px solid #c9b691;
-    position: absolute;
-    top: 0;
-    left: 0;
-    transition: transform 0.4s ease-in-out;
-    transform-origin: top;
-  }
+        const valorFormatado = valorArrecadado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const metaFormatada = metaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  .carta-conteudo {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    background-color: #fff;
-    border-radius: 5px;
-    padding: 20px;
-    text-align: center;
-    color: #333;
-    font-family: 'Arial', sans-serif;
-    transform: translateZ(-1px);
-    opacity: 0;
-    transition: opacity 0.5s ease 0.4s;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-
-  .carta-container.aberta .envelope {
-    transform: rotateY(180deg);
-  }
-
-  .carta-container.aberta .envelope-flap {
-    transform: rotateX(-180deg);
-    opacity: 0;
-  }
-  
-  .carta-container.aberta .carta-conteudo {
-    opacity: 1;
-    transform: translateZ(0px);
-  }
-</style>
-
-<!-- Seção da Cartinha de Agradecimento (Só aparece se o pagamento for bem-sucedido) -->
-<div id="secao-agradecimento">
-  <h2 style="color: #00c853; margin-bottom: 5px;">Doação Confirmada! 🎉</h2>
-  <p style="color: var(--text-muted); font-size: 0.95rem;">Você recebeu uma cartinha de agradecimento. Clique nela para abrir:</p>
-
-  <div class="carta-container" id="minhaCartinha" onclick="abrirCarta()">
-    <div class="envelope">
-      <div class="envelope-flap"></div>
-      <div class="carta-conteudo">
-        <h3 style="color: #00c853; margin-bottom: 8px; font-size: 1.2rem;">Muito Obrigado! 🙏</h3>
-        <p style="margin: 0; font-size: 0.95rem; line-height: 1.4;">Obrigado por apoiar essa causa e Deus te abençoe por isso!</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  // Função para abrir a carta ao clicar
-  function abrirCarta() {
-    const cartinha = document.getElementById('minhaCartinha');
-    cartinha.classList.toggle('aberta');
-  }
-
-  // Verifica se o usuário voltou do PicPay com "?status=sucesso"
-  window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('status') === 'sucesso') {
-      const secao = document.getElementById('secao-agradecimento');
-      if (secao) {
-        secao.style.display = 'block'; // Mostra a seção da cartinha
-        secao.scrollIntoView({ behavior: 'smooth' }); // Joga a tela suavemente até ela
+        const barra = document.getElementById('progress-bar');
+        const texto = document.getElementById('progress-text');
+        
+        if (barra) barra.style.width = porcentagem + '%';
+        if (texto) {
+          texto.innerHTML = `Arrecadado: <strong>${valorFormatado}</strong> de ${metaFormatada} (${porcentagem.toFixed(1)}%)`;
+        }
+      } catch (e) {
+        const texto = document.getElementById('progress-text');
+        if (texto) texto.innerText = "Erro ao carregar dados de doação.";
       }
     }
-  });
-</script>
+
+    carregarArrecadacao();
+
+    // Verifica se o usuário voltou com ?status=sucesso após o pagamento
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('status') === 'sucesso') {
+        const secao = document.getElementById('secao-agradecimento');
+        if (secao) {
+          secao.style.display = 'block';
+          secao.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    });
+  </script>
+</body>
 </html>

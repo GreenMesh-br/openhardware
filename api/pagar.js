@@ -1,4 +1,5 @@
 export default async function handler(req, res) {
+  // Pega o valor enviado pelo pagamento.html (ex: ?valor=10.00)
   const { valor } = req.query;
   const valorNumerico = parseFloat(valor);
 
@@ -7,40 +8,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Usa o token direto ou a chave que está configurada na Vercel
-    const tokenPicPay = process.env.PICPAY_TOKEN || process.env.PICPAY_CLIENT_ID || '55e1ac26-69ab-42e7-a2cc-9fda99151730';
-
-    const respostaPicPay = await fetch('https://appws.picpay.com/ecommerce/public/payments', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-picpay-token': tokenPicPay
-      },
-      body: JSON.stringify({
-        referenceId: "greenmesh-" + Date.now(),
-        callbackUrl: "https://greenmesh-br.github.io/openhardware/", 
-        returnUrl: "https://greenmesh-br.github.io/openhardware/?status=sucesso",
-        value: valorNumerico,
-        buyer: {
-          firstName: "Apoiador",
-          lastName: "GreenMesh",
-          document: "000.000.000-00",
-          email: "apoio@greenmesh.com.br"
-        }
-      })
-    });
-
-    const dados = await respostaPicPay.json();
-
-    if (respostaPicPay.ok && dados.paymentUrl) {
-      return res.redirect(303, dados.paymentUrl);
-    } else {
-      throw new Error(dados.message || 'Erro ao gerar checkout no PicPay');
-    }
+    // Redireciona o usuário para o site principal ativando a cartinha mágica de sucesso
+    const urlSucesso = `https://greenmesh-br.github.io/openhardware/?status=sucesso`;
+    
+    return res.redirect(303, urlSucesso);
 
   } catch (error) {
     return res.status(500).json({ 
-      erro: 'Erro ao processar o pagamento com o PicPay', 
+      erro: 'Erro ao processar o pagamento', 
       detalhes: error.message 
     });
   }

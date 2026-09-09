@@ -1,4 +1,3 @@
-
 export default async function handler(req, res) {
   const { valor } = req.query;
   const valorNumerico = parseFloat(valor);
@@ -8,12 +7,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Requisição segura puxando o token diretamente das variáveis de ambiente da Vercel
+    // Usa o token direto ou a chave que está configurada na Vercel
+    const tokenPicPay = process.env.PICPAY_TOKEN || process.env.PICPAY_CLIENT_ID || '55e1ac26-69ab-42e7-a2cc-9fda99151730';
+
     const respostaPicPay = await fetch('https://appws.picpay.com/ecommerce/public/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-picpay-token': process.env.PICPAY_TOKEN
+        'x-picpay-token': tokenPicPay
       },
       body: JSON.stringify({
         referenceId: "greenmesh-" + Date.now(),

@@ -1,1 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apoiar Projeto — Open Hardware</title>
+  <style>
+    :root {
+      --bg: #080a09;
+      --panel: #111512;
+      --text: #f4f5f1;
+      --muted: #a7ada8;
+      --line: rgba(255,255,255,.10);
+      --green: #37d56b;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+    }
+    .payment-box {
+      width: min(440px, calc(100% - 32px));
+      padding: 40px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: var(--panel);
+      box-shadow: 0 35px 100px rgba(0,0,0,.45);
+      text-align: center;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.8rem;
+      letter-spacing: -0.03em;
+    }
+    p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    input[type="number"] {
+      background: rgba(8,10,9,0.8);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 14px 18px;
+      border-radius: 999px;
+      outline: none;
+      font-size: 1.1rem;
+      text-align: center;
+      width: 100%;
+    }
+    input[type="number"]:focus {
+      border-color: var(--green);
+    }
+    .btn-pay {
+      background: var(--green);
+      color: #061008;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    .btn-pay:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    .back-link:hover {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
 
+  <div class="payment-box">
+    <h2>Apoie o Lote Piloto</h2>
+    <p>Insira o valor que deseja doar (a partir de R$ 0,01) para ajudar a viabilizar o projeto.</p>
+    
+    <div class="input-group">
+      <input type="number" id="valorPersonalizado" placeholder="Ex: 10.00 ou 0.01" min="0.01" step="0.01">
+      <button class="btn-pay" onclick="processarPagamento()">Continuar para Pagamento ↗</button>
+    </div>
+
+    <a href="index.html" class="back-link">← Voltar para a página principal</a>
+  </div>
+
+  <script>
+    function processarPagamento() {
+      const input = document.getElementById('valorPersonalizado');
+      let valor = parseFloat(input.value);
+
+      if (isNaN(valor) || valor <= 0) {
+        alert('Por favor, insira um valor válido para a doação (mínimo R$ 0,01).');
+        return;
+      }
+
+      // Redireciona para a API na Vercel passando o valor exato
+      window.location.href = `/api/pagar?valor=${valor.toFixed(2)}`;
+    }
+  </script>
+
+</body>
+</html>

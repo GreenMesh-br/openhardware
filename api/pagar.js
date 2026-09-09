@@ -7,7 +7,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Pega as credenciais das variáveis de ambiente da Vercel
     const clientId = process.env.PICPAY_CLIENT_ID;
     const clientSecret = process.env.PICPAY_CLIENT_SECRET;
 
@@ -15,16 +14,18 @@ export default async function handler(req, res) {
       throw new Error('Credenciais do PicPay não configuradas nas variáveis de ambiente da Vercel.');
     }
 
-    // 2. Autenticação OAuth 2.0 para obter o token de acesso temporário do PicPay
-    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-    
-    const tokenResponse = await fetch('https://api.picpay.com/oauth2/token', {
+    // 1. Autenticação OAuth 2.0 correta do Gateway PicPay
+    const tokenResponse = await fetch('https://ecommerce-api.svcp.picpay.com/oauth2/token', {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${credentials}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: 'grant_type=client_credentials&scope=charges'
+      body: JSON.stringify({
+        grant_type: 'client_credentials',
+        client_id: clientId,
+        client_secret: clientSecret
+      })
     });
 
     const tokenData = await tokenResponse.json();
@@ -35,7 +36,7 @@ export default async function handler(req, res) {
 
     const accessToken = tokenData.access_token;
 
-    // 3. Cria a cobrança oficial utilizando o token gerado
+    // 2. Criação da cobrança oficial utilizando o token Bearer gerado
     const paymentResponse = await fetch('https://appws.picpay.com/ecommerce/public/payments', {
       method: 'POST',
       headers: {
@@ -58,7 +59,6 @@ export default async function handler(req, res) {
 
     const paymentData = await paymentResponse.json();
 
-    // 4. Redireciona para o checkout oficial do PicPay retornado pela API
     if (paymentResponse.ok && paymentData.paymentUrl) {
       return res.redirect(303, paymentData.paymentUrl);
     } else {

@@ -14,7 +14,7 @@ export default async function handler(req, res) {
       throw new Error('Credenciais do PicPay não configuradas nas variáveis de ambiente da Vercel.');
     }
 
-    // 1. Autenticação OAuth 2.0 correta do Gateway PicPay
+    // 1. Autenticação OAuth 2.0 no Gateway do PicPay
     const tokenResponse = await fetch('https://ecommerce-api.svcp.picpay.com/oauth2/token', {
       method: 'POST',
       headers: {
@@ -36,8 +36,8 @@ export default async function handler(req, res) {
 
     const accessToken = tokenData.access_token;
 
-    // 2. Criação da cobrança oficial utilizando o token Bearer gerado
-    const paymentResponse = await fetch('https://appws.picpay.com/ecommerce/public/payments', {
+    // 2. Criação da cobrança utilizando o endpoint moderno do Gateway de Checkout
+    const paymentResponse = await fetch('https://ecommerce-api.svcp.picpay.com/checkout/v1/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -59,8 +59,9 @@ export default async function handler(req, res) {
 
     const paymentData = await paymentResponse.json();
 
-    if (paymentResponse.ok && paymentData.paymentUrl) {
-      return res.redirect(303, paymentData.paymentUrl);
+    // 3. Redireciona para o checkout oficial do PicPay
+    if (paymentResponse.ok && (paymentData.paymentUrl || paymentData.checkoutUrl)) {
+      return res.redirect(303, paymentData.paymentUrl || paymentData.checkoutUrl);
     } else {
       throw new Error(paymentData.message || 'Erro ao gerar link de pagamento no PicPay');
     }

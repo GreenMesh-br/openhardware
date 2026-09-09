@@ -1,41 +1,55 @@
 export default async function handler(req, res) {
-  // Pega o valor enviado pelo formulário do site (ex: ?valor=50)
+  // Pega o valor enviado pelo pagamento.html (ex: ?valor=10.00)
   const { valor } = req.query;
-  const valorNumerico = parseFloat(valor) || 25.00; // Valor padrão se não passar nada
+  const valorNumerico = parseFloat(valor);
+
+  // Valida se o valor é válido (mínimo R$ 0,01)
+  if (isNaN(valorNumerico) || valorNumerico <= 0) {
+    return res.status(400).json({ erro: 'Valor de doação inválido.' });
+  }
 
   try {
-    // 💡 Substitua abaixo pela sua lógica ou integração direta com a API do PicPay
-    // Se você estiver usando o PicPay Business / E-commerce API:
+    /* 
+      SE VOCÊ FOR USAR A API OFICIAL DO PICPAY BUSINESS:
+      Descomente o bloco abaixo e configure sua chave 'PICPAY_TOKEN' nas variáveis de ambiente da Vercel.
+    */
     /*
-    const response = await fetch('https://app.picpay.com/ecommerce/public/requests', {
+    const respostaPicPay = await fetch('https://appws.picpay.com/ecommerce/public/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-picpay-token': process.env.PICPAY_TOKEN // Sua chave salva nas variáveis de ambiente da Vercel
+        'x-picpay-token': process.env.PICPAY_TOKEN
       },
       body: JSON.stringify({
         referenceId: "greenmesh-" + Date.now(),
-        callbackUrl: "https://seusite.vercel.app/", // URL do seu site
-        returnUrl: "https://seusite.vercel.app/?status=sucesso",
+        callbackUrl: "https://greenmesh-br.github.io/openhardware/", 
+        returnUrl: "https://greenmesh-br.github.io/openhardware/?status=sucesso",
         value: valorNumerico,
-        buyer: { ... }
+        buyer: {
+          firstName: "Apoiador",
+          lastName: "Anônimo",
+          document: "000.000.000-00",
+          email: "apoio@greenmesh.com.br"
+        }
       })
     });
-    const data = await response.json();
-    return res.redirect(303, data.paymentUrl); // Redireciona para o PicPay
+
+    const dados = await respostaPicPay.json();
+    if (respostaPicPay.ok && dados.paymentUrl) {
+      return res.redirect(303, dados.paymentUrl);
+    }
+    throw new Error(dados.message || 'Erro ao comunicar com o PicPay');
     */
 
-    // --- EXEMPLO PRÁTICO PARA TESTES/LINK DIRETO ---
-    // Se preferir usar um link direto de pagamento do PicPay (ex: seu perfil público ou QR Code fixo ajustado)
-    // Ou redirecionar para uma página intermediária de sucesso simulada:
-    
-    // Redirecionamento simulado para testes (ou link direto do seu PicPay):
-    const urlPicPayGenerica = `https://picpay.me/seuusuario/${valorNumerico}`;
-    
-    // Para fins do fluxo real, redirecionamos o usuário:
-    return res.redirect(303, urlPicPayGenerica);
+    // --- MODO DE TESTE / FLUXO COMPLETO DA CARTINHA ---
+    // Enquanto você não ativa a API oficial do PicPay, 
+    // este comando redireciona o usuário para o seu site ativando a cartinha mágica de sucesso:
+    return res.redirect(303, `https://greenmesh-br.github.io/openhardware/?status=sucesso`);
 
   } catch (error) {
-    return res.status(500).json({ erro: 'Erro ao gerar pagamento', detalhes: error.message });
+    return res.status(500).json({ 
+      erro: 'Erro ao gerar o pagamento', 
+      detalhes: error.message 
+    });
   }
 }

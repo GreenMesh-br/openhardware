@@ -14,37 +14,38 @@ export default async function handler(req, res) {
       throw new Error('Credenciais do PicPay não configuradas na Vercel.');
     }
 
-    // 1. Troca o Client ID e Client Secret por um Access Token válido via OAuth 2.0
+    // Codifica as credenciais em Base64 para o padrão Basic Auth
+    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+    // 1. Solicita o token OAuth 2.0 usando Basic Auth no cabeçalho
     const tokenResponse = await fetch('https://ecommerce-api.svcp.picpay.com/oauth2/token', {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Authorization': `Basic ${credentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json'
       },
-      body: JSON.stringify({
-        grant_type: 'client_credentials',
-        client_id: clientId,
-        client_secret: clientSecret
-      })
+      body: 'grant_type=client_credentials'
     });
 
     const tokenData = await tokenResponse.json();
 
     if (!tokenResponse.ok || !tokenData.access_token) {
       return res.status(500).json({
-        erro: 'Falha na autenticação OAuth do PicPay',
-        detalhes: tokenData
+        erro: 'Falha na autenticação OAuth do PicPay com Basic Auth',
+        detalhesDoPicPay: tokenData
       });
     }
 
     const accessToken = tokenData.access_token;
 
-    // 2. Envia a requisição de pagamento utilizando o Bearer Token gerado
+    // 2. Envia a cobrança utilizando o Bearer Token obtido com sucesso
     const paymentResponse = await fetch('https://ecommerce-api.svcp.picpay.com/checkout/v1/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
+        'Authorization': `Bearer ${accessToken}`,
+        'Accept': 'application/json'
       },
       body: JSON.stringify({
         referenceId: "greenmesh-" + Date.now(),

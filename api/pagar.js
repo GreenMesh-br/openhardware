@@ -14,34 +14,13 @@ export default async function handler(req, res) {
       throw new Error('Credenciais do PicPay não configuradas nas variáveis de ambiente da Vercel.');
     }
 
-    // 1. Autenticação OAuth 2.0 no Gateway do PicPay
-    const tokenResponse = await fetch('https://ecommerce-api.svcp.picpay.com/oauth2/token', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        grant_type: 'client_credentials',
-        client_id: clientId,
-        client_secret: clientSecret
-      })
-    });
-
-    const tokenData = await tokenResponse.json();
-
-    if (!tokenResponse.ok || !tokenData.access_token) {
-      throw new Error(tokenData.message || 'Falha na autenticação OAuth com o PicPay');
-    }
-
-    const accessToken = tokenData.access_token;
-
-    // 2. Geração da cobrança no Gateway de Checkout
-    const paymentResponse = await fetch('https://ecommerce-api.svcp.picpay.com/checkout/v1/payments', {
+    // Chamada direta utilizando as credenciais de Link de Pagamento - API do painel
+    const response = await fetch('https://appws.picpay.com/ecommerce/public/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
+        'x-picpay-id': clientId,
+        'x-picpay-token': clientSecret
       },
       body: JSON.stringify({
         referenceId: "greenmesh-" + Date.now(),
@@ -57,18 +36,20 @@ export default async function handler(req, res) {
       })
     });
 
-    const paymentData = await paymentResponse.json();
+    const data = await response.json();
 
-    // 3. Redirecionamento para o link oficial de pagamento do PicPay
-    if (paymentResponse.ok && (paymentData.paymentUrl || paymentData.checkoutUrl)) {
-      return res.redirect(303, paymentData.paymentUrl || paymentData.checkoutUrl);
+    if (response.ok && data.paymentUrl) {
+      return res.redirect(303, data.paymentUrl);
     } else {
-      throw new Error(paymentData.message || 'Erro ao gerar link de pagamento no PicPay');
+      return res.status(500).json({
+        erro: 'Erro retornado pela API do PicPay',
+        detalhes: data
+      });
     }
 
   } catch (error) {
     return res.status(500).json({ 
-      erro: 'Erro ao processar a API do PicPay', 
+      erro: 'Erro interno ao processar pagamento', 
       detalhes: error.message 
     });
   }

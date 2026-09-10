@@ -14,8 +14,8 @@ export default async function handler(req, res) {
       throw new Error('Credenciais do PicPay não configuradas nas variáveis de ambiente da Vercel.');
     }
 
-    // 1. Solicita o token de acesso OAuth 2.0 oficial utilizando as chaves do painel E-commerce
-    const tokenResponse = await fetch('https://ecommerce-api.svcp.picpay.com/oauth2/token', {
+    // 1. Solicita o token OAuth 2.0 no endpoint oficial de autenticação V2 do PicPay
+    const tokenResponse = await fetch('https://api.picpay.com/oauth2/token', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -32,14 +32,14 @@ export default async function handler(req, res) {
 
     if (!tokenResponse.ok || !tokenData.access_token) {
       return res.status(500).json({
-        erro: 'Falha na autenticação OAuth com o PicPay',
+        erro: 'Falha na autenticação OAuth V2 com o PicPay',
         detalhes: tokenData
       });
     }
 
     const accessToken = tokenData.access_token;
 
-    // 2. Cria a cobrança utilizando a API V2 oficial com o Bearer Token obtido
+    // 2. Cria a intenção de pagamento na API V2 oficial do PicPay
     const paymentResponse = await fetch('https://api.picpay.com/ecommerce/v2/payments', {
       method: 'POST',
       headers: {
@@ -54,22 +54,21 @@ export default async function handler(req, res) {
         buyer: {
           firstName: "Apoiador",
           lastName: "GreenMesh",
-          document: "000.000.000-00",
-          email: "apoio@greenmesh.com.br"
+          document: "000.000.000-00"
         }
       })
     });
 
     const paymentData = await paymentResponse.json();
 
-    // 3. Captura a URL de redirecionamento e envia o usuário para o checkout
+    // 3. Redireciona o usuário para o checkout oficial gerado
     const paymentUrl = paymentData.paymentUrl || paymentData.checkoutUrl || paymentData.url;
 
     if (paymentResponse.ok && paymentUrl) {
       return res.redirect(303, paymentUrl);
     } else {
       return res.status(500).json({
-        erro: 'Erro ao gerar link de pagamento na API V2 do PicPay',
+        erro: 'Erro ao gerar pagamento na API V2 do PicPay',
         detalhes: paymentData
       });
     }

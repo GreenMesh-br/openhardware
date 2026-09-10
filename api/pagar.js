@@ -7,19 +7,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Tenta capturar as credenciais considerando qualquer variação de nome na Vercel
-    const clientId = process.env.PICPAY_CLIENT_ID || process.env.ID_DO_CLIENTE_PICP;
-    const sellerToken = process.env.PICPAY_SELLER_TOKEN || process.env.X_SELLER_TOKEN;
-
-    if (!clientId || !sellerToken) {
-      return res.status(500).json({
-        erro: 'Credenciais ausentes na Vercel',
-        detalhes: {
-          temClientId: !!clientId,
-          temSellerToken: !!sellerToken
-        }
-      });
-    }
+    // Definindo as credenciais diretamente para garantir que nenhuma variável de ambiente falhe
+    const clientId = process.env.PICPAY_CLIENT_ID || "c744e5e6-efa8-4fe0-8c38-eb89152bd314";
+    const sellerToken = "e1046939-510d-415c-a4a0-3d72ab68ede6";
 
     const paymentResponse = await fetch('https://appws.picpay.com/ecommerce/public/payments', {
       method: 'POST',

@@ -14,37 +14,13 @@ export default async function handler(req, res) {
       throw new Error('Credenciais do PicPay não configuradas na Vercel.');
     }
 
-    // Codifica as credenciais em Base64 para o padrão Basic Auth
-    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-
-    // 1. Solicita o token OAuth 2.0 usando Basic Auth no cabeçalho
-    const tokenResponse = await fetch('https://ecommerce-api.svcp.picpay.com/oauth2/token', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${credentials}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json'
-      },
-      body: 'grant_type=client_credentials'
-    });
-
-    const tokenData = await tokenResponse.json();
-
-    if (!tokenResponse.ok || !tokenData.access_token) {
-      return res.status(500).json({
-        erro: 'Falha na autenticação OAuth do PicPay com Basic Auth',
-        detalhesDoPicPay: tokenData
-      });
-    }
-
-    const accessToken = tokenData.access_token;
-
-    // 2. Envia a cobrança utilizando o Bearer Token obtido com sucesso
-    const paymentResponse = await fetch('https://ecommerce-api.svcp.picpay.com/checkout/v1/payments', {
+    // Chamada oficial para a API de E-commerce do PicPay com autenticação por chave de lojista
+    const paymentResponse = await fetch('https://appws.picpay.com/ecommerce/public/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
+        'x-picpay-id': clientId,
+        'x-picpay-token': clientSecret,
         'Accept': 'application/json'
       },
       body: JSON.stringify({
@@ -61,7 +37,17 @@ export default async function handler(req, res) {
       })
     });
 
-    const paymentData = await paymentResponse.json();
+    const responseText = await paymentResponse.text();
+    let paymentData;
+
+    try {
+      paymentData = JSON.parse(responseText);
+    } catch (e) {
+      return res.status(500).json({
+        erro: 'O PicPay retornou uma resposta inválida (não-JSON)',
+        respostaBruta: responseText
+      });
+    }
 
     const paymentUrl = paymentData.paymentUrl || paymentData.checkoutUrl || paymentData.url;
 
@@ -69,7 +55,7 @@ export default async function handler(req, res) {
       return res.redirect(303, paymentUrl);
     } else {
       return res.status(500).json({
-        erro: 'Erro retornado pela API do PicPay ao criar cobrança',
+        erro: 'Erro retornado pela API do PicPay',
         detalhes: paymentData
       });
     }

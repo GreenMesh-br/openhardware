@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 
     const accessToken = tokenData.access_token;
 
-    // 2. Criação da cobrança utilizando o endpoint moderno do Gateway de Checkout
+    // 2. Geração da cobrança no Gateway de Checkout
     const paymentResponse = await fetch('https://ecommerce-api.svcp.picpay.com/checkout/v1/payments', {
       method: 'POST',
       headers: {
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
 
     const paymentData = await paymentResponse.json();
 
-    // 3. Redireciona para o checkout oficial do PicPay
+    // 3. Redirecionamento para o link oficial de pagamento do PicPay
     if (paymentResponse.ok && (paymentData.paymentUrl || paymentData.checkoutUrl)) {
       return res.redirect(303, paymentData.paymentUrl || paymentData.checkoutUrl);
     } else {

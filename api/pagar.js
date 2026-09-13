@@ -1,4 +1,14 @@
 export default async function handler(req, res) {
+  const { valor } = req.query;
+  const valorNumerico = Number(valor);
+
+  if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
+    return res.status(400).json({
+      ok: false,
+      erro: 'Valor inválido.'
+    });
+  }
+
   try {
     const clientId = process.env.PICPAY_CLIENT_ID;
     const clientSecret = process.env.PICPAY_CLIENT_SECRET;
@@ -6,11 +16,12 @@ export default async function handler(req, res) {
     if (!clientId || !clientSecret) {
       return res.status(500).json({
         ok: false,
-        erro: 'Variáveis PICPAY_CLIENT_ID ou PICPAY_CLIENT_SECRET não configuradas.'
+        erro: 'Credenciais do PicPay não configuradas na Vercel.'
       });
     }
 
-    const response = await fetch(
+    // 1. Obtém o token OAuth
+    const tokenResponse = await fetch(
       'https://ecommerce-api.svc.picpay.com/oauth2/token',
       {
         method: 'POST',
@@ -26,29 +37,54 @@ export default async function handler(req, res) {
       }
     );
 
-    const data = await response.json();
+    const tokenData = await tokenResponse.json();
 
-    if (!response.ok) {
-      return res.status(response.status).json({
+    if (!tokenResponse.ok || !tokenData.access_token) {
+      return res.status(502).json({
         ok: false,
-        erro: 'PicPay recusou a autenticação OAuth.',
-        status: response.status,
-        detalhes: data
+        etapa: 'oauth',
+        erro: 'Não foi possível obter o token OAuth.',
+        status: tokenResponse.status,
+        detalhes: tokenData
       });
     }
 
-    return res.status(200).json({
-      ok: true,
-      mensagem: 'Autenticação OAuth do PicPay funcionando.',
-      token_type: data.token_type,
-      expires_in: data.expires_in
+    // 2. Identificador único da cobrança
+    const reference = `greenmesh-${Date.now()}`;
+
+    // 3. Cria o Payment Link
+    const paymentResponse = await fetch(
+      'https://ecommerce-api.svc.picpay.com/paymentlink/create',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${tokenData.access_token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          referenceId: reference,
+          value: Number(valorNumerico.toFixed(2)),
+          description: 'Apoio ao projeto GreenMesh',
+          returnUrl: 'https://greenmesh-br.github.io/openhardware/?status=sucesso'
+        })
+      }
+    );
+
+    const paymentData = await paymentResponse.json();
+
+    return res.status(paymentResponse.status).json({
+      ok: paymentResponse.ok,
+      etapa: 'paymentlink',
+      status: paymentResponse.status,
+      resposta: paymentData
     });
 
   } catch (error) {
     return res.status(500).json({
       ok: false,
-      erro: 'Erro ao conectar ao PicPay.',
-      detalhes: error.message
+      etapa: 'servidor',
+      erro: error.message
     });
   }
 }

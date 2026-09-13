@@ -7,16 +7,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Definindo as credenciais diretamente para garantir que nenhuma variável de ambiente falhe
     const clientId = process.env.PICPAY_CLIENT_ID || "c744e5e6-efa8-4fe0-8c38-eb89152bd314";
     const sellerToken = "e1046939-510d-415c-a4a0-3d72ab68ede6";
 
+    // O PicPay exige o cabeçalho exato 'x-picpay-token' no endpoint clássico
     const paymentResponse = await fetch('https://appws.picpay.com/ecommerce/public/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-picpay-id': clientId,
-        'x-seller-token': sellerToken,
+        'x-picpay-token': sellerToken,
         'Accept': 'application/json'
       },
       body: JSON.stringify({

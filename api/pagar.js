@@ -1,13 +1,18 @@
 export default async function handler(req, res) {
-  try {
-    const { valor } = req.query;
-    const valorNumerico = Number(valor);
+  if (req.method !== "GET") {
+    return res.status(405).json({
+      ok: false,
+      erro: "Método não permitido"
+    });
+  }
 
-    if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
+  try {
+    const valor = Number(req.query.valor);
+
+    if (!Number.isFinite(valor) || valor <= 0) {
       return res.status(400).json({
         ok: false,
-        etapa: "valor",
-        erro: "Informe um valor válido."
+        erro: "Valor inválido"
       });
     }
 
@@ -17,8 +22,7 @@ export default async function handler(req, res) {
     if (!clientId || !clientSecret) {
       return res.status(500).json({
         ok: false,
-        etapa: "config",
-        erro: "Credenciais do PicPay não encontradas."
+        erro: "Credenciais PicPay não configuradas no Vercel"
       });
     }
 
@@ -42,39 +46,27 @@ export default async function handler(req, res) {
     const tokenText = await tokenResponse.text();
 
     if (!tokenResponse.ok) {
+      console.error("PicPay OAuth:", tokenResponse.status, tokenText);
+
       return res.status(502).json({
         ok: false,
         etapa: "oauth",
-        status: tokenResponse.status,
-        resposta: tokenText.substring(0, 1000)
+        erro: "Falha na autenticação com o PicPay"
       });
     }
 
-    let tokenData;
-
-    try {
-      tokenData = JSON.parse(tokenText);
-    } catch {
-      return res.status(502).json({
-        ok: false,
-        etapa: "oauth",
-        erro: "Resposta do OAuth não é JSON.",
-        resposta: tokenText.substring(0, 1000)
-      });
-    }
+    const tokenData = JSON.parse(tokenText);
 
     if (!tokenData.access_token) {
       return res.status(502).json({
         ok: false,
         etapa: "oauth",
-        erro: "Access token não encontrado."
+        erro: "PicPay não retornou access_token"
       });
     }
 
     // 2. Criar Payment Link
-    const valorCentavos = Math.round(valorNumerico * 100);
-
-    const orderNumber = `GM-${Date.now()}`;
+    const reference = `greenmesh-${Date.now()}`;
 
     const paymentResponse = await fetch(
       "https://ecommerce-api.svc.picpay.com/v1/paymentlink/create",
@@ -87,11 +79,10 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           charge: {
-            name: "Apoio ao projeto GreenMesh",
-            description: "Apoio ao lote piloto do projeto GreenMesh",
-            order_number: orderNumber,
-            redirect_url:
-              "https://greenmesh-br.github.io/openhardware/?status=sucesso",
+            name: "Apoio ao GreenMesh",
+            description: "Contribuição para o projeto GreenMesh",
+            order_number: reference,
+            redirect_url: "https://openhardware.vercel.app/",
             payment: {
               methods: [
                 "BRCODE",
@@ -103,13 +94,11 @@ export default async function handler(req, res) {
               ]
             },
             amounts: {
-              product: valorCentavos,
-              delivery: 0
+              product: Math.round(valor * 100)
             }
           },
           options: {
-            allow_create_pix_key: true,
-            card_max_installment_number: 3
+            allow_create_pix_key: true
           }
         })
       }
@@ -117,20 +106,48 @@ export default async function handler(req, res) {
 
     const paymentText = await paymentResponse.text();
 
-    return res.status(200).json({
-      ok: paymentResponse.ok,
-      etapa: "paymentlink",
-      status: paymentResponse.status,
-      contentType: paymentResponse.headers.get("content-type"),
-      resposta: paymentText.substring(0, 5000)
-    });
+    if (!paymentResponse.ok) {
+      console.error(
+        "PicPay Payment Link:",
+        paymentResponse.status,
+        paymentText
+      );
+
+      return res.status(502).json({
+        ok: false,
+        etapa: "paymentlink",
+        statusPicPay: paymentResponse.status,
+        erro: "O PicPay recusou ou bloqueou a criação do Payment Link"
+      });
+    }
+
+    const paymentData = JSON.parse(paymentText);
+
+    // O nome exato do campo de URL depende da resposta da API.
+    const checkoutUrl =
+      paymentData.url ||
+      paymentData.payment_url ||
+      paymentData.redirect_url ||
+      paymentData.charge?.url;
+
+    if (!checkoutUrl) {
+      console.error("Resposta inesperada do PicPay:", paymentData);
+
+      return res.status(502).json({
+        ok: false,
+        etapa: "paymentlink",
+        erro: "PicPay criou a cobrança, mas não retornou URL de checkout"
+      });
+    }
+
+    return res.redirect(302, checkoutUrl);
 
   } catch (error) {
+    console.error("Erro /api/pagar:", error);
+
     return res.status(500).json({
       ok: false,
-      etapa: "runtime",
-      nome: error.name,
-      erro: error.message
+      erro: "Erro interno ao criar pagamento"
     });
   }
 }

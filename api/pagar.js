@@ -1,14 +1,4 @@
 export default async function handler(req, res) {
-  const { valor } = req.query;
-  const valorNumerico = Number(valor);
-
-  if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
-    return res.status(400).json({
-      ok: false,
-      erro: 'Valor inválido.'
-    });
-  }
-
   try {
     const clientId = process.env.PICPAY_CLIENT_ID;
     const clientSecret = process.env.PICPAY_CLIENT_SECRET;
@@ -16,11 +6,10 @@ export default async function handler(req, res) {
     if (!clientId || !clientSecret) {
       return res.status(500).json({
         ok: false,
-        erro: 'Credenciais do PicPay não configuradas na Vercel.'
+        erro: 'Credenciais não configuradas.'
       });
     }
 
-    // 1. Obtém o token OAuth
     const tokenResponse = await fetch(
       'https://ecommerce-api.svc.picpay.com/oauth2/token',
       {
@@ -43,16 +32,11 @@ export default async function handler(req, res) {
       return res.status(502).json({
         ok: false,
         etapa: 'oauth',
-        erro: 'Não foi possível obter o token OAuth.',
         status: tokenResponse.status,
         detalhes: tokenData
       });
     }
 
-    // 2. Identificador único da cobrança
-    const reference = `greenmesh-${Date.now()}`;
-
-    // 3. Cria o Payment Link
     const paymentResponse = await fetch(
       'https://ecommerce-api.svc.picpay.com/paymentlink/create',
       {
@@ -63,21 +47,22 @@ export default async function handler(req, res) {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          referenceId: reference,
-          value: Number(valorNumerico.toFixed(2)),
-          description: 'Apoio ao projeto GreenMesh',
-          returnUrl: 'https://greenmesh-br.github.io/openhardware/?status=sucesso'
+          referenceId: `greenmesh-${Date.now()}`,
+          value: 1.00,
+          description: 'Apoio ao projeto GreenMesh'
         })
       }
     );
 
-    const paymentData = await paymentResponse.json();
+    const contentType = paymentResponse.headers.get('content-type');
+    const rawResponse = await paymentResponse.text();
 
-    return res.status(paymentResponse.status).json({
+    return res.status(200).json({
       ok: paymentResponse.ok,
       etapa: 'paymentlink',
       status: paymentResponse.status,
-      resposta: paymentData
+      contentType,
+      resposta_inicio: rawResponse.substring(0, 1000)
     });
 
   } catch (error) {

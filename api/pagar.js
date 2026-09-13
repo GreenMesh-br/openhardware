@@ -1,54 +1,54 @@
 export default async function handler(req, res) {
-  const { valor } = req.query;
-  const valorNumerico = parseFloat(valor);
-
-  if (isNaN(valorNumerico) || valorNumerico <= 0) {
-    return res.status(400).json({ erro: 'Valor de doação inválido.' });
-  }
-
   try {
-    // Utilizando o Client ID da sua integração e o token clássico gerado no painel
-    const clientId = "c744e5e6-efa8-4fe0-8c38-eb89152bd314";
-    const sellerToken = "e1046939-510d-415c-a4a0-3d72ab68ede6";
+    const clientId = process.env.PICPAY_CLIENT_ID;
+    const clientSecret = process.env.PICPAY_CLIENT_SECRET;
 
-    const paymentResponse = await fetch('https://appws.picpay.com/ecommerce/public/payments', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-picpay-id': clientId,
-        'x-picpay-token': sellerToken,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        referenceId: "greenmesh-" + Date.now(),
-        callbackUrl: "https://greenmesh-br.github.io/openhardware/",
-        returnUrl: "https://greenmesh-br.github.io/openhardware/?status=sucesso",
-        value: valorNumerico,
-        buyer: {
-          firstName: "Apoiador",
-          lastName: "GreenMesh",
-          document: "000.000.000-00",
-          email: "apoio@greenmesh.com.br"
-        }
-      })
-    });
-
-    const paymentData = await paymentResponse.json();
-    const paymentUrl = paymentData.paymentUrl || paymentData.checkoutUrl || paymentData.url;
-
-    if (paymentResponse.ok && paymentUrl) {
-      return res.redirect(303, paymentUrl);
-    } else {
+    if (!clientId || !clientSecret) {
       return res.status(500).json({
-        erro: 'Erro retornado pela API do PicPay',
-        detalhes: paymentData
+        ok: false,
+        erro: 'Variáveis PICPAY_CLIENT_ID ou PICPAY_CLIENT_SECRET não configuradas.'
       });
     }
 
+    const response = await fetch(
+      'https://ecommerce-api.svc.picpay.com/oauth2/token',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          grant_type: 'client_credentials',
+          client_id: clientId,
+          client_secret: clientSecret
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        ok: false,
+        erro: 'PicPay recusou a autenticação OAuth.',
+        status: response.status,
+        detalhes: data
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      mensagem: 'Autenticação OAuth do PicPay funcionando.',
+      token_type: data.token_type,
+      expires_in: data.expires_in
+    });
+
   } catch (error) {
-    return res.status(500).json({ 
-      erro: 'Erro interno no servidor da Vercel', 
-      detalhes: error.message 
+    return res.status(500).json({
+      ok: false,
+      erro: 'Erro ao conectar ao PicPay.',
+      detalhes: error.message
     });
   }
 }
